@@ -1,4 +1,4 @@
-package polytech.content.analyzer.hash;
+package hash;
 
 public class ImageHashedType {
     private String filename;

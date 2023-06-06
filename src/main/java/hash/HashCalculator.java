@@ -1,4 +1,4 @@
-package polytech.content.analyzer.hash;
+package hash;
 
 import java.nio.file.Path;
 

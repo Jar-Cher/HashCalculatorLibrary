@@ -1,21 +1,18 @@
-package polytech.content.analyzer.hash;
+package hash;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.*;
-import polytech.content.analyzer.stat.StatUtils;
+import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
-import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Base64;
 
@@ -34,8 +31,6 @@ public class PHashCalculator implements HashCalculator {
 
     private static final int SIZE = 32;
     private static final int SMALLER_SIZE = 8;
-
-    private static final Logger logger = LoggerFactory.getLogger(PHashCalculator.class);
 
     private static final ColorConvertOp colorConvert = new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null);
 
@@ -64,16 +59,12 @@ public class PHashCalculator implements HashCalculator {
      * - phash in form of long number, or null if path is incorrect
      */
     private Long calculateHash(Path path, int minWidth) {
-        long startTime = StatUtils.getMeasureStartTime();
         InputStream is = null;
         try {
             is = new FileInputStream(path.toString());
             Long result = calculateHash(is, minWidth);
-            StatUtils.success(startTime, CALCULATE_HASH, path, result);
             return result;
-        } catch (java.io.IOException e) {
-            logger.error(CALCULATE_HASH_NO_SUCH_FILE, path, e);
-            StatUtils.failure(startTime, CALCULATE_HASH_NO_SUCH_FILE, path, e);
+        } catch (IOException e) {
             return null;
         }
     }
@@ -98,10 +89,8 @@ public class PHashCalculator implements HashCalculator {
      * - phash in form of long number, or null if path is incorrect
      */
     private Long calculateHash(InputStream is, int minWidth) throws IOException {
-        long startTime = StatUtils.getMeasureStartTime();
         BufferedImage img = ImageIO.read(is);
         Long result = calculateHash(img, minWidth);
-        StatUtils.success(startTime, CALCULATE_HASH, result);
         return result;
     }
 
@@ -125,7 +114,6 @@ public class PHashCalculator implements HashCalculator {
      * - phash in form of long number, or null if path is incorrect
      */
     private Long calculateHash(BufferedImage img, int minWidth) {
-        long startTime = StatUtils.getMeasureStartTime();
 
         // optimizing technic for small images
         if (img.getWidth() < minWidth) {
@@ -202,7 +190,6 @@ public class PHashCalculator implements HashCalculator {
                 hashBits = (dctVals[x][y] > avg ? (hashBits << 1) | 0x01 : (hashBits << 1) & 0xFFFFFFFFFFFFFFFEl);
             }
         }
-        StatUtils.success(startTime, CALCULATE_HASH, hashBits);
         return hashBits;
     }
 
